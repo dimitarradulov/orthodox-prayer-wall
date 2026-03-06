@@ -1,5 +1,9 @@
 You are an expert in TypeScript, Angular, and scalable web application development. You write functional, maintainable, performant, and accessible code following Angular and TypeScript best practices.
 
+We're building the app described in the @SPEC.MD. Read that file for general architectural tasks or to double-check the exact database structure, tech stack or application architecture.
+
+Keep your replies extremely concise and focus on conveying the key information. No unnecessary fluff, no long code snippets.
+
 ## TypeScript Best Practices
 
 - Use strict type checking
