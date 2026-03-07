@@ -29,371 +29,452 @@ UI should be:
 ### Tech Stack
 
 **Frontend:**
+
 - Angular
-- AngularFire
-- Tailwind CSS (recommended)
+- Tailwind CSS
 
 **Backend:**
-- Firebase Authentication
-- Firestore Database
-- Firebase Security Rules
 
-**Hosting:**
-- Firebase Hosting
-
----
-
-## 2. Core Features
-
-### Unauthenticated Users
-
-**Can:**
-- View prayer requests
-- Open full prayer request details
-
-**Cannot:**
-- Submit requests
-- Pray
-- Edit
-- Delete
-
-### Authenticated Users
-
-Users logged in with Google Sign-In can:
-
-- Submit prayer requests
-- Pray for requests
-- Edit their own requests
-- Delete their own requests
-
-### Admin Users
-
-Admins can:
-
-- Delete inappropriate prayer requests
+- Supabase
+- PostgreSQL database
+- Supabase Auth (Google)
+- Row Level Security
 
 ---
 
-## 3. Main User Flow
-
-### Visiting the Website
-
-User sees **Latest Prayer Requests**. Each request card contains:
-
-- Title
-- Short description preview
-- Author
-- Created date
-- "Read more" link
-- "I prayed 🙏" button
-
-### Clicking "I Prayed"
-
-If user:
-- **Not logged in** → show login prompt
-- **Logged in** → register prayer
-
-After clicking:
-- Button shows "You prayed 🙏"
-- Button becomes disabled
-
-### Request Owner
-
-Owner can see: **🙏 12 people prayed**
-
-Other users cannot see this number.
-
----
-
-## 4. UI Layout
-
-### Homepage
+## 2. Architecture Overview
 
 ```
-## Header
-  Logo | Login Button
-
-## Prayer Request Feed
-  Request Card
-  Request Card
-  Request Card
-
-  Load more (auto via scroll)
-```
-
-### Prayer Request Card
-
-```
-Title
-
-Short text preview...
-
-Author: John
-Date: Mar 5
-
-[ Read More ]  [ I Prayed 🙏 ]
-```
-
-### Prayer Request Details Page
-
-```
-Title
-
-Full prayer request text
-
-Author
-Date
-
-[ I Prayed 🙏 ]
-
-If owner:
-  🙏 12 people prayed
+Angular UI
+↓
+Signal Stores
+↓
+Supabase Services
+↓
+Supabase API
+↓
+PostgreSQL Database
 ```
 
 ---
 
-## 5. UI Design Style
-
-### Light Byzantine Theme
-
-| Element        | Value       | Description      |
-| -------------- | ----------- | ---------------- |
-| Background     | `#f5f1e6`   | Parchment tone   |
-| Primary Color  | `#8b0000`   | Deep Orthodox red |
-| Accent         | `#c9a227`   | Byzantine gold   |
-
-### Font Suggestions
-
-- **Titles:** Cormorant Garamond
-- **Body:** Inter
-
----
-
-## 6. Angular Project Structure
+## 3. Angular Project Structure
 
 ```
 src/app
-├── core/
-│   ├── auth/
-│   ├── services/
-│   └── guards/
-├── features/
-│   └── prayer-requests/
-│       ├── components/
-│       ├── pages/
-│       └── services/
-├── shared/
-│   ├── components/
-│   └── models/
-└── admin/
+
+core/
+  auth/
+  services/
+  guards/
+
+features/
+  prayer-requests/
+    pages/
+    components/
+    store/
+    services/
+
+  admin/
+
+shared/
+  models/
+  components/
+  ui/
+```
+
+Example feature folder:
+
+```
+prayer-requests/
+
+  prayer-feed.page.ts
+  prayer-details.page.ts
+  prayer-card.component.ts
+  prayer-form.component.ts
 ```
 
 ---
 
-## 7. Data Model (Firestore)
+## 4. Angular Modern Features
 
-**Collection:** `prayerRequests`
-
-**Document:** `prayerRequests/{requestId}`
+### Standalone Components
 
 ```ts
-{
-  title: string;
-  description: string;
-  authorId: string;
-  authorName: string;
-  createdAt: timestamp;
-  prayerCount: number;
-  status: 'active' | 'answered' | 'archived';
+@Component({
+  selector: 'app-prayer-card',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './prayer-card.html'
+})
+```
+
+### Dependency Injection
+
+```ts
+const supabase = inject(SupabaseService);
+```
+
+### Angular Control Flow
+
+```html
+@if(request()){
+  <app-prayer-card />
+}
+```
+
+Loop:
+
+```html
+@for(request of requests(); track request.id){
+  <app-prayer-card [request]="request"/>
 }
 ```
 
 ---
 
-## 8. Prayer Tracking
+## 5. Signal-Based State Management
 
-**Collection:** `prayers`
+Each feature has a store service.
 
-**Document:** `prayers/{prayerId}`
+Example: `prayer-requests.store.ts`
+
+Responsibilities:
+
+- feed state
+- pagination
+- mutations
+- loading state
+
+### Example Store
 
 ```ts
-{
-  requestId: string;
-  userId: string;
-  createdAt: timestamp;
-}
-```
+@Injectable({ providedIn: 'root' })
+export class PrayerRequestsStore {
 
-**Purpose:**
-- Prevent duplicate prayers
-- Track who prayed
+  private prayerService = inject(PrayerRequestsService);
 
----
+  private _requests = signal<PrayerRequest[]>([]);
+  private _loading = signal(false);
 
-## 9. "I Prayed" Logic
+  requests = this._requests.asReadonly();
+  loading = this._loading.asReadonly();
 
-When user clicks button:
+  async loadInitial() {
+    this._loading.set(true);
 
-**Step 1** — Check if prayer exists:
-```
-where requestId == X
-where userId == currentUser
-```
-If exists → do nothing.
+    const data = await this.prayerService.getFeed();
 
-**Step 2** — Create prayer record:
-```ts
-prayers/ {
-  requestId,
-  userId,
-  createdAt,
-}
-```
+    this._requests.set(data);
 
-**Step 3** — Increment counter:
-```ts
-prayerRequests/{id}
-prayerCount += 1  // Use Firestore increment(1)
-```
-
----
-
-## 10. Infinite Scroll Feed
-
-**Initial query:**
-```ts
-orderBy('createdAt', 'desc')
-limit(10)
-```
-
-**On scroll:**
-```ts
-startAfter(lastVisible)
-limit(10)
-```
-
-This ensures efficient pagination.
-
----
-
-## 11. Security Rules
-
-```js
-match /prayerRequests/{id} {
-  allow read: if true;
-  allow create: if request.auth != null;
-  allow update: if request.auth.uid == resource.data.authorId;
-  allow delete: if request.auth.uid == resource.data.authorId
-             || request.auth.token.admin == true;
-}
-
-match /prayers/{id} {
-  allow create: if request.auth != null;
-  allow read: if request.auth != null;
+    this._loading.set(false);
+  }
 }
 ```
 
 ---
 
-## 12. Authentication
+## 6. Ideal Database Schema (Supabase)
 
-**Using:**
-- Firebase Auth
-- Google Provider
-
-**Angular service:** `AuthService`
-
-**Methods:**
-- `loginWithGoogle()`
-- `logout()`
-- `currentUser$`
+Since Supabase uses PostgreSQL, we use relational tables instead of collections.
 
 ---
 
-## 13. Angular Services
+## 7. Tables
 
-### `PrayerRequestService`
+Main tables:
 
-- `createRequest()`
-- `updateRequest()`
-- `deleteRequest()`
-- `getRequests()`
-- `getRequestById()`
+- `users`
+- `prayer_requests`
+- `prayers`
 
-### `PrayerService`
+### 7.1 Users Table
 
-- `pray(requestId)`
-- `hasUserPrayed(requestId)`
-- `getPrayerCount(requestId)`
+Supabase Auth already creates: `auth.users`
 
-### `AuthService`
+We create a public profile table: `profiles`
 
-- `login()`
-- `logout()`
-- `user$`
+**Schema:**
 
----
+```
+profiles
 
-## 14. Admin Functionality
+id          uuid (PK, references auth.users.id)
+display_name text
+avatar_url  text
+role        text default 'user'
+created_at  timestamp
+```
 
-Admins identified via **custom claims**.
+Example:
 
-Admin can:
-- `deleteRequest()`
+```
+id: uuid
+display_name: "John"
+role: "user"
+```
 
-**Admin UI:** Admin sees a Delete button on each request.
+Admin: `role = 'admin'`
 
----
+### 7.2 Prayer Requests Table
 
-## 15. Status System
+**Schema:**
 
-Prayer request statuses:
+```
+prayer_requests
+
+id           uuid primary key
+title        text
+description  text
+author_id    uuid references profiles(id)
+author_name  text
+prayer_count integer default 0
+status       text default 'active'
+created_at   timestamp default now()
+```
+
+Status options:
+
 - `active`
 - `answered`
 - `archived`
 
-Users can mark their own request as **answered** 🙏
+### 7.3 Prayers Table
 
----
+This table records who prayed for which request.
 
-## 16. Angular Components
-
-Recommended components:
-
-- `HeaderComponent`
-- `PrayerFeedComponent`
-- `PrayerCardComponent`
-- `PrayerDetailsComponent`
-- `SubmitPrayerComponent`
-- `EditPrayerComponent`
-- `LoginButtonComponent`
-
----
-
-## 17. Performance Considerations
-
-Use Firestore indexes:
+**Schema:**
 
 ```
-Index: createdAt desc
+prayers
+
+id         uuid primary key
+request_id uuid references prayer_requests(id)
+user_id    uuid references profiles(id)
+created_at timestamp default now()
+```
+
+Important constraint:
+
+```sql
+unique (request_id, user_id)
+```
+
+This guarantees:
+
+- One user = one prayer per request
+- No duplicates possible.
+
+---
+
+## 8. Query Design
+
+Feed query:
+
+```sql
+select *
+from prayer_requests
+where status = 'active'
+order by created_at desc
+limit 10
+```
+
+Pagination:
+
+```sql
+where created_at < last_seen
+order by created_at desc
+limit 10
 ```
 
 ---
 
-## 18. MVP Development Plan
+## 9. Supabase Service (Angular)
 
-Build in this order:
+Create wrapper: `supabase.service.ts`
 
-| Step | Task |
-| ---- | ---- |
-| 1    | Angular project setup |
-| 2    | Firebase setup (Auth + Firestore) |
-| 3    | Google authentication |
-| 4    | Create prayer request |
-| 5    | Prayer feed |
-| 6    | Prayer details page |
-| 7    | "I prayed" functionality |
-| 8    | Prevent duplicate prayers |
-| 9    | Owner prayer count visibility |
-| 10   | Edit/Delete request |
-| 11   | Admin delete |
+```ts
+@Injectable({ providedIn: 'root' })
+export class SupabaseService {
+
+  client = createClient(
+    environment.supabaseUrl,
+    environment.supabaseKey
+  );
+
+}
+```
+
+---
+
+## 10. Prayer Requests Service
+
+`prayer-requests.service.ts`
+
+Example query:
+
+```ts
+async getFeed() {
+
+  const { data } = await this.supabase.client
+    .from('prayer_requests')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  return data;
+
+}
+```
+
+---
+
+## 11. Prayer Logic
+
+When user clicks "I prayed":
+
+**Step 1** — Insert into `prayers`:
+
+```ts
+await supabase
+  .from('prayers')
+  .insert({
+    request_id: id,
+    user_id: user.id
+  })
+```
+
+**Step 2** — Increment prayer count:
+
+```ts
+await supabase.rpc('increment_prayer_count', {
+  request_id: id
+});
+```
+
+Using SQL function.
+
+---
+
+## 12. SQL Function
+
+Create safe counter increment:
+
+```sql
+create function increment_prayer_count(request_id uuid)
+returns void
+language sql
+as $$
+  update prayer_requests
+  set prayer_count = prayer_count + 1
+  where id = request_id;
+$$;
+```
+
+---
+
+## 13. Row Level Security
+
+Enable RLS.
+
+**Prayer Requests**
+
+| Operation | Policy           |
+|-----------|------------------|
+| Read      | public read      |
+| Insert    | authenticated users |
+| Update    | author only      |
+| Delete    | author OR admin  |
+
+Example: `auth.uid() = author_id`
+
+**Prayers Table**
+
+Policy — Insert only if: `auth.uid() = user_id`
+
+---
+
+## 14. Authentication
+
+Use Supabase Auth with Google provider.
+
+```ts
+await supabase.auth.signInWithOAuth({
+  provider: 'google'
+});
+```
+
+Auth state becomes signal:
+
+```ts
+user = signal<User | null>(null);
+```
+
+---
+
+## 15. Infinite Scroll
+
+Use `IntersectionObserver`.
+
+When sentinel visible: `loadNextPage()`
+
+---
+
+## 16. Owner Prayer Count Visibility
+
+```html
+@if(user()?.id === request.author_id){
+  <div>{{request.prayer_count}} prayed</div>
+}
+```
+
+---
+
+## 17. Admin Functionality
+
+Admins determined by: `profiles.role = 'admin'`
+
+Admin can delete any request.
+
+---
+
+## 18. UI Theme (Light Byzantine)
+
+| Token      | Value     |
+|------------|-----------|
+| Background | `#f5f1e6` |
+| Primary    | `#8b0000` |
+| Accent     | `#c9a227` |
+
+---
+
+## 19. MVP Development Roadmap
+
+1. Angular project
+2. Supabase project
+3. Google authentication
+4. Profiles table
+5. Prayer request creation
+6. Feed
+7. Prayer button
+8. Unique prayer constraint
+9. Infinite scroll
+10. Owner view
+11. Admin delete
+
+---
+
+## 20. Scalability
+
+This schema scales well because:
+
+- PostgreSQL indexes
+- relational joins
+- unique constraints
+- counter column
+- simple feed query
+
+It can easily handle:
+
+- 100k+ prayer requests
+- millions of prayers
