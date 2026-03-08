@@ -6,4 +6,13 @@
   --color-background: #f5f1e6;
   --color-primary: #8b0000;
   --color-accent: #c9a227;
+  --font-title: 'Cormorant Garamond', Georgia, serif;
+  --font-prayer: 'PT Serif', Georgia, serif;
+  --font-ui: 'Inter', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-ui);
+  }
 }
