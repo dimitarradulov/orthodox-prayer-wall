@@ -4,6 +4,9 @@ We're building the app described in the @SPEC.MD. Read that file for general arc
 
 Keep your replies extremely concise and focus on conveying the key information. No unnecessary fluff, no long code snippets.
 
+Whenever working with any third-party library or something similar, you MUST look up the official documentation to ensure that you're working with up-to-date information.
+Use the DocsExplorer subagent for efficient documentation lookup.
+
 ## TypeScript Best Practices
 
 - Use strict type checking
