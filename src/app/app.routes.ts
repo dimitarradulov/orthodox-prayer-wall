@@ -15,12 +15,17 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'profile',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/profile/profile.page').then((m) => m.ProfilePage),
+  },
+  {
     path: 'admin',
     canActivate: [authGuard],
     loadComponent: () => import('./features/admin/admin.page').then((m) => m.AdminPage),
   },
   {
-    path: 'login',
+    path: 'signin',
     loadComponent: () => import('./core/auth/login.page').then((m) => m.LoginPage),
   },
   {

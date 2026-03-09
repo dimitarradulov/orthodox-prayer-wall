@@ -1,0 +1,118 @@
+<header
+  class="fixed top-0 left-0 right-0 z-50 border-b border-primary/20 bg-background text-primary shadow-sm"
+>
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+    <!-- Logo + Title -->
+    <a routerLink="/" class="flex items-center gap-3 no-underline">
+      <img ngSrc="/logo.png" width="40" height="40" alt="Orthodox Prayer Wall logo" priority />
+      <span class="font-title text-xl font-semibold tracking-wide">Orthodox Prayer Wall</span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden items-center gap-8 md:flex" role="navigation" aria-label="Main navigation">
+      <a
+        routerLink="/"
+        class="hover:text-accent transition-colors"
+        routerLinkActive="font-bold"
+        [routerLinkActiveOptions]="{ exact: true }"
+        >Prayer Feed</a
+      >
+      @if (auth.isLoggedIn()) {
+        <a
+          routerLink="/profile"
+          class="hover:text-accent transition-colors"
+          routerLinkActive="font-bold"
+          >My Profile</a
+        >
+      }
+      @if (auth.isAdmin()) {
+        <a
+          routerLink="/admin"
+          class="hover:text-accent transition-colors"
+          routerLinkActive="font-bold"
+          >Admin</a
+        >
+      }
+      @if (auth.isLoggedIn()) {
+        <button class="hover:text-accent cursor-pointer transition-colors" (click)="auth.signOut()">
+          Sign Out
+        </button>
+      } @else {
+        <button
+          class="hover:text-accent cursor-pointer transition-colors"
+          routerLink="/signin"
+          routerLinkActive="font-bold"
+        >
+          Sign In
+        </button>
+      }
+    </nav>
+
+    <!-- Mobile hamburger -->
+    <button
+      class="flex items-center justify-center rounded p-2 text-2xl leading-none md:hidden"
+      aria-controls="mobile-nav"
+      aria-label="Toggle navigation menu"
+      [attr.aria-expanded]="mobileOpen()"
+      (click)="mobileOpen.update((v) => !v)"
+    >
+      {{ mobileOpen() ? '✕' : '☰' }}
+    </button>
+  </div>
+
+  <!-- Mobile dropdown -->
+  @if (mobileOpen()) {
+    <nav
+      id="mobile-nav"
+      class="flex flex-col gap-9 bg-background px-4 pb-4 md:hidden pt-3"
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      <a
+        routerLink="/"
+        class="hover:text-accent transition-colors"
+        routerLinkActive="font-bold"
+        [routerLinkActiveOptions]="{ exact: true }"
+        (click)="mobileOpen.set(false)"
+        >Prayer Feed</a
+      >
+      @if (auth.isLoggedIn()) {
+        <a
+          routerLink="/profile"
+          class="hover:text-accent transition-colors"
+          routerLinkActive="font-bold"
+          (click)="mobileOpen.set(false)"
+          >My Profile</a
+        >
+      }
+      @if (auth.isAdmin()) {
+        <a
+          routerLink="/admin"
+          class="hover:text-accent transition-colors"
+          routerLinkActive="font-bold"
+          (click)="mobileOpen.set(false)"
+          >Admin</a
+        >
+      }
+      @if (auth.isLoggedIn()) {
+        <button
+          class="text-left hover:text-accent cursor-pointer transition-colors"
+          (click)="signOut()"
+        >
+          Sign Out
+        </button>
+      } @else {
+        <button
+          class="text-left hover:text-accent cursor-pointer transition-colors"
+          routerLink="/signin"
+          routerLinkActive="font-bold"
+        >
+          Sign In
+        </button>
+      }
+    </nav>
+  }
+</header>
+
+<!-- Spacer so content doesn't hide under fixed header -->
+<div class="h-16" aria-hidden="true"></div>
