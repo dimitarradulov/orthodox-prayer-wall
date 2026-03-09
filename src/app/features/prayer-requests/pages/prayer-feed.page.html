@@ -1,1 +1,8 @@
-<p>Prayer Feed Page</p>
+<main class="bg-background min-h-screen px-4 py-12 max-w-7xl mx-auto">
+  <header class="mb-10">
+    <h1 class="font-title text-3xl text-primary">Prayer Requests</h1>
+    <p class="text-gray-500 mt-1">Lift up your brothers and sisters in prayer</p>
+  </header>
+
+  <app-prayer-list [prayers]="prayers()" />
+</main>
