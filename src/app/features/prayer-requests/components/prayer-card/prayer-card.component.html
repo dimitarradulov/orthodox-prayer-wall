@@ -18,7 +18,7 @@
     <span class="text-sm text-gray-500">— {{ prayer().name }}</span>
     <button
       type="button"
-      class="flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      class="cursor-pointer flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       [attr.aria-label]="'Pray for ' + prayer().name + ', ' + prayer().prayerCount + ' prayers lit'"
       (click)="onPray()"
     >
