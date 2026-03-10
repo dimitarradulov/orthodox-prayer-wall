@@ -45,3 +45,4 @@ Thumbs.db
 
 .env
 /src/environments
+/.claude/settings.local.json
