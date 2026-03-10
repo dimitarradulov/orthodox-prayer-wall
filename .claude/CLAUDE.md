@@ -54,7 +54,7 @@ Use the DocsExplorer subagent for efficient documentation lookup.
 - Use native control flow (`@if`, `@for`, `@switch`) instead of `*ngIf`, `*ngFor`, `*ngSwitch`
 - Use the async pipe to handle observables
 - Do not assume globals like (`new Date()`) are available.
-- Do not call methods inside of a template
+- Do not call methods inside of templates, prefer pipes instead
 
 ## Services
 
