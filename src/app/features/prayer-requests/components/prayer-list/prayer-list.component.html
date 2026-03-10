@@ -6,7 +6,12 @@
   >
     @for (prayer of prayers(); track prayer.id) {
       <li>
-        <app-prayer-card [prayer]="prayer" />
+        <app-prayer-card
+          [prayer]="prayer"
+          [currentUserId]="currentUserId()"
+          (deleteClicked)="deleteClicked.emit($event)"
+          (editClicked)="editClicked.emit($event)"
+        />
       </li>
     }
   </ul>

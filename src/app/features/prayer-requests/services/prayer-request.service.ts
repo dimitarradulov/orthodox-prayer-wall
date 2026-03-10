@@ -19,6 +19,11 @@ export class PrayerRequestService {
     return data as PrayerRequest[];
   }
 
+  async delete(id: string): Promise<void> {
+    const { error } = await this.supabase.from('prayer_requests').delete().eq('id', id);
+    if (error) throw error;
+  }
+
   async create(title: string, description: string) {
     const user = this.auth.user();
     if (!user) throw new Error('User must be authenticated');

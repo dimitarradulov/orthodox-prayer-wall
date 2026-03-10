@@ -11,18 +11,47 @@
   <p class="font-prayer text-gray-800 leading-relaxed flex-1">{{ prayer().description }}</p>
 
   <footer class="flex items-center justify-between">
-    <span class="text-sm text-gray-500">— {{ prayer().author_name }}</span>
-    <button
-      type="button"
-      class="cursor-pointer flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-      [attr.aria-label]="
-        'Pray for ' + prayer().author_name + ', ' + prayer().prayer_count + ' prayers lit'
-      "
-      (click)="onPray()"
-    >
-      <span aria-hidden="true">🕯️</span>
-      <span>Pray</span>
-      <span class="bg-white/20 rounded px-1.5 py-0.5 text-xs">{{ prayer().prayer_count }}</span>
-    </button>
+    <span class="text-sm text-gray-500">&mdash; {{ prayer().author_name }}</span>
+
+    @if (isOwner()) {
+      <div class="flex items-center gap-2">
+        <span
+          class="flex items-center gap-1 text-sm text-gray-500"
+          [attr.aria-label]="prayer().prayer_count + ' prayers lit'"
+        >
+          <span aria-hidden="true">🕯️</span>
+          <span>{{ prayer().prayer_count }}</span>
+        </span>
+        <button
+          type="button"
+          class="cursor-pointer text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          aria-label="Edit prayer request"
+          (click)="onEdit()"
+        >
+          Edit
+        </button>
+        <button
+          type="button"
+          class="cursor-pointer text-sm font-medium px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
+          aria-label="Delete prayer request"
+          (click)="onDelete()"
+        >
+          Delete
+        </button>
+      </div>
+    } @else {
+      <button
+        type="button"
+        class="cursor-pointer flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        [attr.aria-label]="
+          'Pray for ' + prayer().author_name + ', ' + prayer().prayer_count + ' prayers lit'
+        "
+        (click)="onPray()"
+      >
+        <span aria-hidden="true">🕯️</span>
+        <span>Pray</span>
+        <span class="bg-white/20 rounded px-1.5 py-0.5 text-xs">{{ prayer().prayer_count }}</span>
+      </button>
+    }
   </footer>
 </article>
