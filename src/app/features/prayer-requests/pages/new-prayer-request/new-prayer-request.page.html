@@ -1,0 +1,61 @@
+<div class="mx-auto max-w-2xl px-4 py-8">
+  <h1 class="font-title mb-6 text-2xl font-semibold text-primary">Request a Prayer</h1>
+
+  @if (errorMessage()) {
+    <div class="mb-4 rounded border border-red-300 bg-red-50 p-3 text-red-800" role="alert">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="mb-4">
+      <label for="title" class="mb-1 block font-medium text-primary">Title</label>
+      <input
+        id="title"
+        formControlName="title"
+        type="text"
+        class="w-full rounded border border-primary/30 bg-background px-3 py-2 text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        aria-describedby="title-error"
+        [attr.aria-invalid]="form.controls.title.invalid && form.controls.title.touched"
+      />
+      @if (form.controls.title.invalid && form.controls.title.touched) {
+        <p id="title-error" class="mt-1 text-sm text-red-600">
+          @if (form.controls.title.errors?.['required']) {
+            Title is required.
+          } @else if (form.controls.title.errors?.['maxlength']) {
+            Title must be 150 characters or fewer.
+          }
+        </p>
+      }
+    </div>
+
+    <div class="mb-6">
+      <label for="description" class="mb-1 block font-medium text-primary">Description</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        rows="5"
+        class="w-full rounded border border-primary/30 bg-background px-3 py-2 text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        aria-describedby="description-error"
+        [attr.aria-invalid]="form.controls.description.invalid && form.controls.description.touched"
+      ></textarea>
+      @if (form.controls.description.invalid && form.controls.description.touched) {
+        <p id="description-error" class="mt-1 text-sm text-red-600">
+          @if (form.controls.description.errors?.['required']) {
+            Description is required.
+          } @else if (form.controls.description.errors?.['maxlength']) {
+            Description must be 2000 characters or fewer.
+          }
+        </p>
+      }
+    </div>
+
+    <button
+      type="submit"
+      class="cursor-pointer bg-primary text-white text-sm font-medium px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50"
+      [disabled]="submitting()"
+    >
+      {{ submitting() ? 'Submitting...' : 'Submit Prayer Request' }}
+    </button>
+  </form>
+</div>

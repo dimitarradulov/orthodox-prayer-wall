@@ -25,6 +25,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/admin/admin.page').then((m) => m.AdminPage),
   },
   {
+    path: 'new-prayer',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/prayer-requests/pages/new-prayer-request/new-prayer-request.page').then(
+        (m) => m.NewPrayerRequestPage,
+      ),
+  },
+  {
     path: 'signin',
     loadComponent: () => import('./core/auth/login.page').then((m) => m.LoginPage),
   },

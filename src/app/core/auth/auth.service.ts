@@ -21,6 +21,7 @@ export class AuthService {
   readonly error = this._error.asReadonly();
   readonly isLoggedIn = computed(() => !!this._user());
   readonly isAdmin = computed(() => this._profile()?.role === 'admin');
+  readonly displayName = computed(() => this._profile()?.display_name ?? null);
 
   constructor() {
     this.supabase.auth.getUser().then(({ data, error }) => {

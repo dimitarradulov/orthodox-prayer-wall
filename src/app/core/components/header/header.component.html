@@ -37,6 +37,11 @@
         <button class="hover:text-accent cursor-pointer transition-colors" (click)="auth.signOut()">
           Sign Out
         </button>
+        <a
+          routerLink="/new-prayer"
+          class="cursor-pointer bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >Request a Prayer</a
+        >
       } @else {
         <button
           class="hover:text-accent cursor-pointer transition-colors"
@@ -101,6 +106,12 @@
         >
           Sign Out
         </button>
+        <a
+          routerLink="/new-prayer"
+          class="cursor-pointer bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          (click)="mobileOpen.set(false)"
+          >Request a Prayer</a
+        >
       } @else {
         <button
           class="text-left hover:text-accent cursor-pointer transition-colors"
