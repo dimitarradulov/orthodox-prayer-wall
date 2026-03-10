@@ -6,5 +6,5 @@ export interface PrayerRequest {
   author_name: string;
   prayer_count: number;
   status: 'active' | 'answered' | 'archived';
-  created_at: Date;
+  created_at: string;
 }

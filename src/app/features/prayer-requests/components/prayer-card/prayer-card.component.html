@@ -3,7 +3,7 @@
 >
   <header class="flex items-center justify-between">
     <h2 class="text-lg font-semibold text-gray-900">{{ prayer().title }}</h2>
-    <time class="text-xs text-gray-400" [attr.datetime]="prayer().created_at.toISOString()">
+    <time class="text-xs text-gray-400" [attr.datetime]="prayer().created_at">
       {{ prayer().created_at | relativeDate }}
     </time>
   </header>
