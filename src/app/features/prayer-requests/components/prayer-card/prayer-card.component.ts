@@ -1,23 +1,16 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { Prayer } from '../../models/prayer.model';
+import { PrayerRequest } from '../../models/prayer.model';
+import { RelativeDatePipe } from '../../pipes/relative-date.pipe';
 
 @Component({
   selector: 'app-prayer-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './prayer-card.component.html',
+  imports: [RelativeDatePipe],
 })
 export class PrayerCardComponent {
-  prayer = input.required<Prayer>();
+  prayer = input.required<PrayerRequest>();
   prayerClicked = output<string>();
-
-  getRelativeDate(date: Date): string {
-    const now = new Date('2026-03-09');
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    return `${diffDays} days ago`;
-  }
 
   onPray(): void {
     this.prayerClicked.emit(this.prayer().id);

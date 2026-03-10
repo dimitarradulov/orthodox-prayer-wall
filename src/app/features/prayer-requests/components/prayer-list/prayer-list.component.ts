@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { Prayer } from '../../models/prayer.model';
+import { PrayerRequest } from '../../models/prayer.model';
 import { PrayerCardComponent } from '../prayer-card/prayer-card.component';
 
 @Component({
@@ -9,5 +9,5 @@ import { PrayerCardComponent } from '../prayer-card/prayer-card.component';
   templateUrl: './prayer-list.component.html',
 })
 export class PrayerListComponent {
-  prayers = input.required<Prayer[]>();
+  prayers = input.required<PrayerRequest[]>();
 }

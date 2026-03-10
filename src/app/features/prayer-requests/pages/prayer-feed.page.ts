@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { Prayer } from '../models/prayer.model';
+import { PrayerRequest } from '../models/prayer.model';
 import { PrayerListComponent } from '../components/prayer-list/prayer-list.component';
 
 @Component({
@@ -9,30 +9,36 @@ import { PrayerListComponent } from '../components/prayer-list/prayer-list.compo
   templateUrl: './prayer-feed.page.html',
 })
 export class PrayerFeedPage {
-  readonly prayers = signal<Prayer[]>([
+  readonly prayers = signal<PrayerRequest[]>([
     {
       id: '1',
-      name: 'Maria',
-      request: 'Please pray for my mother recovering from surgery...',
-      prayerCount: 14,
-      createdAt: new Date('2026-03-07'),
-      category: 'Health',
+      title: 'Healing for my mother',
+      description: 'Please pray for my mother recovering from surgery...',
+      author_id: 'user-1',
+      author_name: 'Maria',
+      prayer_count: 14,
+      status: 'active',
+      created_at: new Date('2026-03-07'),
     },
     {
       id: '2',
-      name: 'Anonymous',
-      request: 'Lord, grant peace to our family during this difficult time...',
-      prayerCount: 8,
-      createdAt: new Date('2026-03-08'),
-      category: 'Family',
+      title: 'Peace for our family',
+      description: 'Lord, grant peace to our family during this difficult time...',
+      author_id: 'user-2',
+      author_name: 'Anonymous',
+      prayer_count: 8,
+      status: 'active',
+      created_at: new Date('2026-03-08'),
     },
     {
       id: '3',
-      name: 'Alexei',
-      request: 'Thanksgiving for the safe arrival of our newborn son...',
-      prayerCount: 23,
-      createdAt: new Date('2026-03-09'),
-      category: 'Thanksgiving',
+      title: 'Thanksgiving for newborn',
+      description: 'Thanksgiving for the safe arrival of our newborn son...',
+      author_id: 'user-3',
+      author_name: 'Alexei',
+      prayer_count: 23,
+      status: 'active',
+      created_at: new Date('2026-03-09'),
     },
   ]);
 }

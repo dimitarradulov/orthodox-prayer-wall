@@ -1,8 +1,10 @@
-export interface Prayer {
+export interface PrayerRequest {
   id: string;
-  name: string;
-  request: string;
-  prayerCount: number;
-  createdAt: Date;
-  category: string;
+  title: string;
+  description: string;
+  author_id: string;
+  author_name: string;
+  prayer_count: number;
+  status: 'active' | 'answered' | 'archived';
+  created_at: Date;
 }
