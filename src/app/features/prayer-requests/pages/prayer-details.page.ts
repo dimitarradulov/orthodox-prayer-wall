@@ -39,6 +39,7 @@ export class PrayerDetailsPage {
   readonly isOwner = computed(
     () => !!this.currentUserId() && this.currentUserId() === this.prayer()?.author_id,
   );
+  readonly hasPrayed = computed(() => this.prayer()?.has_prayed ?? false);
 
   constructor() {
     effect(() => {
@@ -58,8 +59,10 @@ export class PrayerDetailsPage {
   async onPray(): Promise<void> {
     const prayer = this.prayer();
     if (!prayer) return;
-    await this.prayerRequestService.pray(prayer.id);
-    this.prayer.set({ ...prayer, prayer_count: prayer.prayer_count + 1 });
+    const wasNew = await this.prayerRequestService.pray(prayer.id);
+    if (wasNew) {
+      this.prayer.set({ ...prayer, prayer_count: prayer.prayer_count + 1, has_prayed: true });
+    }
   }
 
   onDelete(): void {

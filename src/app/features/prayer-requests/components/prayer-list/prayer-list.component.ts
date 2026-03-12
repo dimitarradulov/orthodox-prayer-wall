@@ -11,6 +11,7 @@ import { PrayerCardComponent } from '../prayer-card/prayer-card.component';
 export class PrayerListComponent {
   prayers = input.required<PrayerRequest[]>();
   currentUserId = input<string | null>(null);
+  prayerClicked = output<string>();
   deleteClicked = output<string>();
   editClicked = output<string>();
   viewClicked = output<string>();

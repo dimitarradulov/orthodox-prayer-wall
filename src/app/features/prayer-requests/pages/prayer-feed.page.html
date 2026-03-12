@@ -27,6 +27,7 @@
       <app-prayer-list
         [prayers]="store.requests()"
         [currentUserId]="currentUserId()"
+        (prayerClicked)="onPray($event)"
         (deleteClicked)="onDelete($event)"
         (viewClicked)="onView($event)"
       />

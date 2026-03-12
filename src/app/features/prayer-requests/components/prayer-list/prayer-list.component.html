@@ -9,6 +9,7 @@
         <app-prayer-card
           [prayer]="prayer"
           [currentUserId]="currentUserId()"
+          (prayerClicked)="prayerClicked.emit($event)"
           (deleteClicked)="deleteClicked.emit($event)"
           (editClicked)="editClicked.emit($event)"
           (viewClicked)="viewClicked.emit($event)"

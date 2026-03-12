@@ -39,6 +39,19 @@ export class PrayerFeedPage {
     this.router.navigate(['/prayer-request', id]);
   }
 
+  async onPray(id: string): Promise<void> {
+    const wasNew = await this.prayerRequestService.pray(id);
+    if (wasNew) {
+      const prayer = this.store.requests().find((r) => r.id === id);
+      if (prayer) {
+        this.store.updateRequest(id, {
+          prayer_count: prayer.prayer_count + 1,
+          has_prayed: true,
+        });
+      }
+    }
+  }
+
   onDelete(id: string): void {
     this.pendingDeleteId.set(id);
     this.confirmDialog()?.nativeElement.showModal();

@@ -22,7 +22,7 @@ export class PrayerRequestService {
   async getPage(cursor?: string): Promise<PrayerRequest[]> {
     let query = this.supabase
       .from('prayer_requests')
-      .select()
+      .select('*, prayers(id)')
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(30);
@@ -33,22 +33,25 @@ export class PrayerRequestService {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data as PrayerRequest[];
+    return (data as (PrayerRequest & { prayers: { id: string }[] })[]).map(
+      ({ prayers, ...row }) => ({ ...row, has_prayed: (prayers?.length ?? 0) > 0 }),
+    );
   }
 
   async getById(id: string): Promise<PrayerRequest> {
     const { data, error } = await this.supabase
       .from('prayer_requests')
-      .select()
+      .select('*, prayers(id)')
       .eq('id', id)
       .single();
     if (error) throw error;
-    return data as PrayerRequest;
+    const { prayers, ...row } = data as PrayerRequest & { prayers: { id: string }[] };
+    return { ...row, has_prayed: (prayers?.length ?? 0) > 0 };
   }
 
-  async pray(id: string): Promise<void> {
-    const { error } = await this.supabase.rpc('increment_prayer_count', { prayer_id: id });
-    if (error) throw error;
+  async pray(id: string): Promise<boolean> {
+    const { data } = await this.supabase.rpc('pray_for_request', { p_request_id: id });
+    return !!data;
   }
 
   async delete(id: string): Promise<void> {

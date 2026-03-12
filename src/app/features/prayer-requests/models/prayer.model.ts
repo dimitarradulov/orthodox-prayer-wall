@@ -7,4 +7,5 @@ export interface PrayerRequest {
   prayer_count: number;
   status: 'active' | 'answered' | 'archived';
   created_at: string;
+  has_prayed: boolean;
 }

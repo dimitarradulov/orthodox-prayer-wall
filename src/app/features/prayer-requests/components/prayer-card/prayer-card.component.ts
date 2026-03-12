@@ -20,6 +20,7 @@ export class PrayerCardComponent {
   isOwner = computed(
     () => !!this.currentUserId() && this.currentUserId() === this.prayer().author_id,
   );
+  hasPrayed = computed(() => this.prayer().has_prayed);
 
   onPray(): void {
     this.prayerClicked.emit(this.prayer().id);

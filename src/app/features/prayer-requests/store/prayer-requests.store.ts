@@ -54,6 +54,10 @@ export class PrayerRequestsStore {
     this._requests.update((list) => list.filter((r) => r.id !== id));
   }
 
+  updateRequest(id: string, patch: Partial<PrayerRequest>): void {
+    this._requests.update((list) => list.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  }
+
   private setCursor(data: PrayerRequest[]): void {
     this._cursor.set(data.length > 0 ? data[data.length - 1].created_at : null);
   }
