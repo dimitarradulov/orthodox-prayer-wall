@@ -7,6 +7,7 @@ import {
   viewChild,
   ElementRef,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { PrayerListComponent } from '../components/prayer-list/prayer-list.component';
 import { PrayerRequestService } from '../services/prayer-request.service';
@@ -23,6 +24,7 @@ import { LoadingSpinnerComponent } from '../../../shared/components/loading-spin
 export class PrayerFeedPage {
   private readonly prayerRequestService = inject(PrayerRequestService);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   readonly store = inject(PrayerRequestsStore);
 
   readonly currentUserId = computed(() => this.auth.user()?.id ?? null);
@@ -31,6 +33,10 @@ export class PrayerFeedPage {
 
   constructor() {
     this.store.loadInitial();
+  }
+
+  onView(id: string): void {
+    this.router.navigate(['/prayer-request', id]);
   }
 
   onDelete(id: string): void {

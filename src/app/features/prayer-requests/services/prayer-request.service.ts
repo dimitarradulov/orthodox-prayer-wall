@@ -36,6 +36,21 @@ export class PrayerRequestService {
     return data as PrayerRequest[];
   }
 
+  async getById(id: string): Promise<PrayerRequest> {
+    const { data, error } = await this.supabase
+      .from('prayer_requests')
+      .select()
+      .eq('id', id)
+      .single();
+    if (error) throw error;
+    return data as PrayerRequest;
+  }
+
+  async pray(id: string): Promise<void> {
+    const { error } = await this.supabase.rpc('increment_prayer_count', { prayer_id: id });
+    if (error) throw error;
+  }
+
   async delete(id: string): Promise<void> {
     const { error } = await this.supabase.from('prayer_requests').delete().eq('id', id);
     if (error) throw error;

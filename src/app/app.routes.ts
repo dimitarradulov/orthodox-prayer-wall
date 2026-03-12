@@ -8,7 +8,7 @@ export const routes: Routes = [
       import('./features/prayer-requests/pages/prayer-feed.page').then((m) => m.PrayerFeedPage),
   },
   {
-    path: 'prayer/:id',
+    path: 'prayer-request/:id',
     loadComponent: () =>
       import('./features/prayer-requests/pages/prayer-details.page').then(
         (m) => m.PrayerDetailsPage,

@@ -13,4 +13,5 @@ export class PrayerListComponent {
   currentUserId = input<string | null>(null);
   deleteClicked = output<string>();
   editClicked = output<string>();
+  viewClicked = output<string>();
 }

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { SlicePipe } from '@angular/common';
 import { PrayerRequest } from '../../models/prayer.model';
 import { RelativeDatePipe } from '../../pipes/relative-date.pipe';
 
@@ -6,7 +7,7 @@ import { RelativeDatePipe } from '../../pipes/relative-date.pipe';
   selector: 'app-prayer-card',
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './prayer-card.component.html',
-  imports: [RelativeDatePipe],
+  imports: [RelativeDatePipe, SlicePipe],
 })
 export class PrayerCardComponent {
   prayer = input.required<PrayerRequest>();
@@ -14,6 +15,7 @@ export class PrayerCardComponent {
   prayerClicked = output<string>();
   deleteClicked = output<string>();
   editClicked = output<string>();
+  viewClicked = output<string>();
 
   isOwner = computed(
     () => !!this.currentUserId() && this.currentUserId() === this.prayer().author_id,
@@ -29,5 +31,9 @@ export class PrayerCardComponent {
 
   onEdit(): void {
     this.editClicked.emit(this.prayer().id);
+  }
+
+  onView(): void {
+    this.viewClicked.emit(this.prayer().id);
   }
 }

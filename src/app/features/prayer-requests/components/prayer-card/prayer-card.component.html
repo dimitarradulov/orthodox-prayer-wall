@@ -8,7 +8,23 @@
     </time>
   </header>
 
-  <p class="font-prayer text-gray-800 leading-relaxed flex-1">{{ prayer().description }}</p>
+  <p class="font-prayer text-gray-800 leading-relaxed flex-1">
+    {{ prayer().description | slice: 0 : 250 }}
+    @if (prayer().description.length > 250) {
+      …
+    }
+  </p>
+
+  @if (currentUserId()) {
+    <button
+      type="button"
+      class="cursor-pointer text-sm text-primary underline underline-offset-2 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 self-start"
+      [attr.aria-label]="'View full prayer: ' + prayer().title"
+      (click)="onView()"
+    >
+      View full prayer
+    </button>
+  }
 
   <footer class="flex items-center justify-between">
     <span class="text-sm text-gray-500">&mdash; {{ prayer().author_name }}</span>
