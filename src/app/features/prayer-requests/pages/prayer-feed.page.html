@@ -4,28 +4,36 @@
     <p class="text-gray-500 mt-1">Lift up your brothers and sisters in prayer</p>
   </header>
 
-  @if (prayersResource.isLoading()) {
-    <div class="flex flex-col items-center justify-center py-20 text-gray-500" role="status">
-      <span class="text-4xl mb-4" aria-hidden="true">&#x1F64F;</span>
-      <p>Loading prayers...</p>
-    </div>
-  } @else if (prayersResource.error()) {
+  @if (store.loading() && store.requests().length === 0) {
+    <app-loading-spinner />
+  } @else if (store.error() && store.requests().length === 0) {
     <div class="flex flex-col items-center justify-center py-20 text-gray-500" role="alert">
       <p class="text-lg mb-4">Something went wrong loading prayers.</p>
       <button
         type="button"
         class="cursor-pointer bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        (click)="prayersResource.reload()"
+        (click)="store.loadInitial()"
       >
         Try again
       </button>
     </div>
   } @else {
-    <app-prayer-list
-      [prayers]="prayersResource.value()!"
-      [currentUserId]="currentUserId()"
-      (deleteClicked)="onDelete($event)"
-    />
+    <div
+      infiniteScroll
+      [infiniteScrollDistance]="2"
+      [infiniteScrollThrottle]="200"
+      (scrolled)="store.loadMore()"
+    >
+      <app-prayer-list
+        [prayers]="store.requests()"
+        [currentUserId]="currentUserId()"
+        (deleteClicked)="onDelete($event)"
+      />
+    </div>
+
+    @if (store.loading()) {
+      <app-loading-spinner />
+    }
   }
 </main>
 

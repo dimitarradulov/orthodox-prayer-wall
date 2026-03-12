@@ -19,6 +19,23 @@ export class PrayerRequestService {
     return data as PrayerRequest[];
   }
 
+  async getPage(cursor?: string): Promise<PrayerRequest[]> {
+    let query = this.supabase
+      .from('prayer_requests')
+      .select()
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (cursor) {
+      query = query.lt('created_at', cursor);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as PrayerRequest[];
+  }
+
   async delete(id: string): Promise<void> {
     const { error } = await this.supabase.from('prayer_requests').delete().eq('id', id);
     if (error) throw error;

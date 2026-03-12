@@ -119,7 +119,7 @@ const supabase = inject(SupabaseService);
 
 ```html
 @if(request()){
-  <app-prayer-card />
+<app-prayer-card />
 }
 ```
 
@@ -127,7 +127,7 @@ Loop:
 
 ```html
 @for(request of requests(); track request.id){
-  <app-prayer-card [request]="request"/>
+<app-prayer-card [request]="request" />
 }
 ```
 
@@ -151,7 +151,6 @@ Responsibilities:
 ```ts
 @Injectable({ providedIn: 'root' })
 export class PrayerRequestsStore {
-
   private prayerService = inject(PrayerRequestsService);
 
   private _requests = signal<PrayerRequest[]>([]);
@@ -296,12 +295,7 @@ Create wrapper: `supabase.service.ts`
 ```ts
 @Injectable({ providedIn: 'root' })
 export class SupabaseService {
-
-  client = createClient(
-    environment.supabaseUrl,
-    environment.supabaseKey
-  );
-
+  client = createClient(environment.supabaseUrl, environment.supabaseKey);
 }
 ```
 
@@ -320,7 +314,7 @@ async getFeed() {
     .from('prayer_requests')
     .select('*')
     .order('created_at', { ascending: false })
-    .limit(10);
+    .limit(30);
 
   return data;
 
@@ -336,19 +330,17 @@ When user clicks "I prayed":
 **Step 1** — Insert into `prayers`:
 
 ```ts
-await supabase
-  .from('prayers')
-  .insert({
-    request_id: id,
-    user_id: user.id
-  })
+await supabase.from('prayers').insert({
+  request_id: id,
+  user_id: user.id,
+});
 ```
 
 **Step 2** — Increment prayer count:
 
 ```ts
 await supabase.rpc('increment_prayer_count', {
-  request_id: id
+  request_id: id,
 });
 ```
 
@@ -379,12 +371,12 @@ Enable RLS.
 
 **Prayer Requests**
 
-| Operation | Policy           |
-|-----------|------------------|
-| Read      | public read      |
+| Operation | Policy              |
+| --------- | ------------------- |
+| Read      | public read         |
 | Insert    | authenticated users |
-| Update    | author only      |
-| Delete    | author OR admin  |
+| Update    | author only         |
+| Delete    | author OR admin     |
 
 Example: `auth.uid() = author_id`
 
@@ -400,7 +392,7 @@ Use Supabase Auth with Google provider.
 
 ```ts
 await supabase.auth.signInWithOAuth({
-  provider: 'google'
+  provider: 'google',
 });
 ```
 
@@ -414,9 +406,312 @@ user = signal<User | null>(null);
 
 ## 15. Infinite Scroll
 
-Use `IntersectionObserver`.
+1. Overview
 
-When sentinel visible: `loadNextPage()`
+The prayer request feed loads progressively as the user scrolls.
+
+The feed order:
+
+Oldest → Newest
+
+This means:
+
+earliest prayer requests appear first
+
+newer requests appear later in the scroll
+
+Cursor-based pagination is used instead of offset pagination for performance and stability.
+
+2. Feed Ordering Strategy
+
+Feed is ordered by:
+
+created_at ASC
+
+Example:
+
+id created_at
+r1 Jan 1
+r2 Jan 2
+r3 Jan 3 3. Cursor Design
+
+The cursor stores the timestamp of the newest item currently loaded.
+
+Example first page:
+
+id created_at
+r1 Jan 1
+r2 Jan 2
+r3 Jan 3
+
+Cursor:
+
+Jan 3
+
+Next page query:
+
+created_at > Jan 3 4. Database Table
+
+Table:
+
+prayer_requests
+
+Schema:
+
+id uuid primary key
+title text
+description text
+author_id uuid
+author_name text
+prayer_count integer
+status text
+created_at timestamp 5. Required Database Index
+
+Create an index to support efficient feed queries.
+
+create index prayer_requests_feed_index
+on prayer_requests (created_at asc);
+
+This allows PostgreSQL to efficiently scan rows in chronological order.
+
+6. Backend Query Design
+
+Queries are executed through Supabase client.
+
+Backend platform:
+
+Supabase
+
+First Page Query
+
+Load first page of oldest requests.
+
+supabase
+.from('prayer_requests')
+.select('\*')
+.eq('status', 'active')
+.order('created_at', { ascending: true })
+.limit(30)
+
+Cursor becomes:
+
+lastItem.created_at
+Next Page Query
+supabase
+.from('prayer_requests')
+.select('\*')
+.eq('status', 'active')
+.gt('created_at', cursor)
+.order('created_at', { ascending: true })
+.limit(30)
+
+Explanation:
+
+gt(created_at, cursor)
+
+means:
+
+created_at > lastSeenTimestamp 7. Angular Architecture
+
+Frontend framework:
+
+Angular
+
+Scrolling handled by:
+
+ngx-infinite-scroll
+
+Architecture:
+
+Feed Component
+↓
+Signal Store
+↓
+Data Service
+↓
+Supabase API
+↓
+PostgreSQL 8. Store State Model
+
+The feed state is managed using Angular signals.
+
+requests = signal<PrayerRequest[]>([]);
+loading = signal(false);
+cursor = signal<string | null>(null);
+hasMore = signal(true);
+
+Explanation:
+
+Signal Purpose
+requests current feed list
+loading prevents duplicate requests
+cursor last loaded timestamp
+hasMore stops pagination when complete 9. Initial Load
+
+Store method:
+
+loadInitial()
+
+Steps:
+
+Set loading = true
+
+Fetch first page
+
+Save results
+
+Store cursor
+
+Set loading = false
+
+Example:
+
+const data = await service.getFirstPage();
+
+this.requests.set(data);
+
+this.cursor.set(
+data[data.length - 1]?.created_at
+); 10. Loading Additional Pages
+
+Store method:
+
+loadMore()
+
+Logic:
+
+Stop if loading
+
+Stop if hasMore = false
+
+Fetch next page
+
+Append results
+
+Update cursor
+
+Example:
+
+this.requests.update(list => [
+...list,
+...data
+]); 11. Stop Condition
+
+If returned results < page size:
+
+hasMore = false
+
+Example:
+
+if(data.length < PAGE_SIZE){
+this.hasMore.set(false);
+} 12. Installing Scroll Library
+
+Install:
+
+npm install ngx-infinite-scroll
+
+Library:
+
+ngx-infinite-scroll
+
+13. Feed Component Setup
+
+Standalone Angular component.
+
+@Component({
+standalone: true,
+selector: 'app-prayer-feed',
+imports: [
+CommonModule,
+InfiniteScrollDirective
+],
+templateUrl: './prayer-feed.html'
+}) 14. Feed Template
+
+<div
+  class="feed"
+  infiniteScroll
+  [infiniteScrollDistance]="2"
+  [infiniteScrollThrottle]="200"
+  (scrolled)="loadMore()"
+>
+
+@for(request of store.requests(); track request.id) {
+
+    <app-prayer-card
+      [request]="request">
+    </app-prayer-card>
+
+}
+
+</div>
+
+@if(store.loading()) {
+
+  <div class="loading">
+    Loading prayer requests...
+  </div>
+}
+
+@if(!store.hasMore()) {
+
+  <div class="end">
+    No more prayer requests
+  </div>
+}
+15. Component Logic
+
+The component delegates logic to the store.
+
+loadMore() {
+this.store.loadMore();
+} 16. Preventing Multiple Requests
+
+Inside store:
+
+if(this.loading()) return;
+
+This prevents rapid scroll events from triggering multiple queries.
+
+17. Empty Feed Handling
+
+If no requests exist:
+
+No prayer requests yet
+
+This state is shown when:
+
+requests.length === 0 18. Performance Characteristics
+
+This architecture scales well because:
+
+PostgreSQL index scanning
+
+cursor pagination
+
+small page size
+
+efficient Angular rendering
+
+Performance remains good even with:
+
+100k+ prayer requests 19. Complete Data Flow
+User scrolls
+↓
+ngx-infinite-scroll triggers
+↓
+FeedComponent.loadMore()
+↓
+PrayerRequestsStore.loadMore()
+↓
+PrayerRequestsService.getNextPage(cursor)
+↓
+Supabase query
+↓
+PostgreSQL index lookup
+↓
+Results appended to feed
 
 ---
 
@@ -424,7 +719,7 @@ When sentinel visible: `loadNextPage()`
 
 ```html
 @if(user()?.id === request.author_id){
-  <div>{{request.prayer_count}} prayed</div>
+<div>{{request.prayer_count}} prayed</div>
 }
 ```
 
@@ -441,7 +736,7 @@ Admin can delete any request.
 ## 18. UI Theme (Light Byzantine)
 
 | Token      | Value     |
-|------------|-----------|
+| ---------- | --------- |
 | Background | `#f5f1e6` |
 | Primary    | `#8b0000` |
 | Accent     | `#c9a227` |
