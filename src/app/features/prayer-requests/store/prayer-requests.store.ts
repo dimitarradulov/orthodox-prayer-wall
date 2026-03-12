@@ -1,6 +1,7 @@
 import { inject, Injectable, signal } from '@angular/core';
 import { PrayerRequestService } from '../services/prayer-request.service';
 import { PrayerRequest } from '../models/prayer.model';
+import { PAGE_SIZE } from '../prayer-requests.constants';
 
 @Injectable({ providedIn: 'root' })
 export class PrayerRequestsStore {
@@ -27,7 +28,7 @@ export class PrayerRequestsStore {
       const data = await this.service.getPage();
       this._requests.set(data);
       this.setCursor(data);
-      this._hasMore.set(data.length === 30);
+      this._hasMore.set(data.length === PAGE_SIZE);
     } catch (err) {
       this._error.set(err);
     } finally {
@@ -42,7 +43,7 @@ export class PrayerRequestsStore {
       const data = await this.service.getPage(this._cursor() ?? undefined);
       this._requests.update((prev) => [...prev, ...data]);
       this.setCursor(data);
-      this._hasMore.set(data.length === 30);
+      this._hasMore.set(data.length === PAGE_SIZE);
     } catch (err) {
       this._error.set(err);
     } finally {

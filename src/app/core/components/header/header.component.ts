@@ -13,10 +13,6 @@ export class HeaderComponent {
   protected readonly auth = inject(AuthService);
   protected readonly mobileOpen = signal(false);
 
-  protected signIn() {
-    this.mobileOpen.set(false);
-  }
-
   protected signOut() {
     this.mobileOpen.set(false);
     this.auth.signOut();

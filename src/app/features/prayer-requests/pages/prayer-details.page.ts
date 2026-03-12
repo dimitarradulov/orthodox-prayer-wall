@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   effect,
-  ElementRef,
   inject,
   input,
   signal,
@@ -12,6 +11,7 @@ import {
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
+import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PrayerRequest } from '../models/prayer.model';
 import { RelativeDatePipe } from '../pipes/relative-date.pipe';
 import { PrayerRequestService } from '../services/prayer-request.service';
@@ -19,7 +19,7 @@ import { PrayerRequestService } from '../services/prayer-request.service';
 @Component({
   selector: 'app-prayer-details',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RelativeDatePipe, LoadingSpinnerComponent],
+  imports: [RelativeDatePipe, LoadingSpinnerComponent, ConfirmDialogComponent],
   templateUrl: './prayer-details.page.html',
 })
 export class PrayerDetailsPage {
@@ -32,8 +32,7 @@ export class PrayerDetailsPage {
   readonly prayer = signal<PrayerRequest | null>(null);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
-  readonly pendingDelete = signal(false);
-  readonly confirmDialog = viewChild<ElementRef<HTMLDialogElement>>('confirmDialog');
+  readonly confirmDialog = viewChild<ConfirmDialogComponent>('confirmDialog');
 
   readonly currentUserId = computed(() => this.auth.user()?.id ?? null);
   readonly isOwner = computed(
@@ -46,51 +45,59 @@ export class PrayerDetailsPage {
       const id = this.id();
       this.loading.set(true);
       this.error.set(null);
+
       this.prayerRequestService
         .getById(id)
-        .then((p) => this.prayer.set(p))
-        .catch((err: unknown) =>
-          this.error.set(err instanceof Error ? err.message : 'Failed to load prayer'),
-        )
-        .finally(() => this.loading.set(false));
+        .then((p) => {
+          if (this.id() === id) {
+            this.prayer.set(p);
+          }
+        })
+        .catch((err: unknown) => {
+          if (this.id() === id) {
+            this.error.set(err instanceof Error ? err.message : 'Failed to load prayer');
+          }
+        })
+        .finally(() => {
+          if (this.id() === id) {
+            this.loading.set(false);
+          }
+        });
     });
   }
 
   async onPray(): Promise<void> {
     const prayer = this.prayer();
     if (!prayer) return;
-    const wasNew = await this.prayerRequestService.pray(prayer.id);
-    if (wasNew) {
-      this.prayer.set({ ...prayer, prayer_count: prayer.prayer_count + 1, has_prayed: true });
+    this.error.set(null);
+    try {
+      const wasNew = await this.prayerRequestService.pray(prayer.id);
+      if (wasNew) {
+        this.prayer.set({ ...prayer, prayer_count: prayer.prayer_count + 1, has_prayed: true });
+      }
+    } catch (err) {
+      this.error.set(err instanceof Error ? err.message : 'Failed to pray. Please try again.');
     }
   }
 
   onDelete(): void {
-    this.pendingDelete.set(true);
-    this.confirmDialog()?.nativeElement.showModal();
+    this.confirmDialog()?.open();
   }
 
   async confirmDelete(): Promise<void> {
     const p = this.prayer();
+    this.error.set(null);
     if (p) {
-      await this.prayerRequestService.delete(p.id);
+      try {
+        await this.prayerRequestService.delete(p.id);
+        this.router.navigate(['/']);
+      } catch (err) {
+        this.error.set(err instanceof Error ? err.message : 'Failed to delete. Please try again.');
+      }
     }
-    this.closeDialog();
-    this.router.navigate(['/']);
   }
 
   cancelDelete(): void {
-    this.closeDialog();
-  }
-
-  onDialogClick(event?: MouseEvent): void {
-    if (event?.target === this.confirmDialog()?.nativeElement) {
-      this.closeDialog();
-    }
-  }
-
-  private closeDialog(): void {
-    this.confirmDialog()?.nativeElement.close();
-    this.pendingDelete.set(false);
+    // dialog closed by ConfirmDialogComponent
   }
 }
