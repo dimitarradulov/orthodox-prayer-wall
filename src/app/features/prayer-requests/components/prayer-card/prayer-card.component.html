@@ -39,7 +39,7 @@
           Delete
         </button>
       </div>
-    } @else {
+    } @else if (currentUserId()) {
       <button
         type="button"
         class="cursor-pointer flex items-center gap-2 bg-primary text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
@@ -52,6 +52,14 @@
         <span>Pray</span>
         <span class="bg-white/20 rounded px-1.5 py-0.5 text-xs">{{ prayer().prayer_count }}</span>
       </button>
+    } @else {
+      <span
+        class="flex items-center gap-1 text-sm text-gray-500"
+        [attr.aria-label]="prayer().prayer_count + ' prayers lit'"
+      >
+        <span aria-hidden="true">🕯️</span>
+        <span>{{ prayer().prayer_count }}</span>
+      </span>
     }
   </footer>
 </article>
