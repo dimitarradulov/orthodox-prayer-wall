@@ -82,6 +82,10 @@ export class PrayerDetailsPage {
     }
   }
 
+  onEdit(): void {
+    this.router.navigate(['/prayer-request', this.id(), 'edit']);
+  }
+
   onDelete(): void {
     this.confirmDialog()?.open();
   }

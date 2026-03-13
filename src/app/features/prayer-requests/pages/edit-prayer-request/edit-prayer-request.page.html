@@ -1,0 +1,21 @@
+<div class="mx-auto max-w-2xl px-4 py-8">
+  <h1 class="font-title mb-6 text-2xl font-semibold text-primary">Edit Prayer Request</h1>
+
+  @if (loading()) {
+    <app-loading-spinner />
+  } @else {
+    <app-prayer-request-form
+      submitLabel="Update Prayer Request"
+      [initialTitle]="prayer()?.title"
+      [initialDescription]="prayer()?.description"
+      [submitting]="submitting()"
+      (formSubmitted)="onSubmit($event)"
+    />
+
+    @if (errorMessage()) {
+      <div class="mt-4 rounded border border-red-300 bg-red-50 p-3 text-red-800" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+  }
+</div>

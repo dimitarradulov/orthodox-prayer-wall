@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { adminGuard } from './core/guards/admin.guard';
+import { prayerOwnerGuard } from './core/guards/prayer-owner.guard';
 
 export const routes: Routes = [
   {
@@ -24,6 +25,14 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [authGuard, adminGuard],
     loadComponent: () => import('./features/admin/admin.page').then((m) => m.AdminPage),
+  },
+  {
+    path: 'prayer-request/:id/edit',
+    canActivate: [authGuard, prayerOwnerGuard],
+    loadComponent: () =>
+      import('./features/prayer-requests/pages/edit-prayer-request/edit-prayer-request.page').then(
+        (m) => m.EditPrayerRequestPage,
+      ),
   },
   {
     path: 'new-prayer',

@@ -49,6 +49,18 @@ export class PrayerRequestService {
     if (error) throw error;
   }
 
+  async update(id: string, title: string, description: string): Promise<void> {
+    try {
+      const { error } = await this.supabase
+        .from('prayer_requests')
+        .update({ title, description })
+        .eq('id', id);
+      if (error) throw error;
+    } catch (err) {
+      throw err instanceof Error ? err : new Error('Failed to update prayer request.');
+    }
+  }
+
   async create(title: string, description: string) {
     const user = this.auth.user();
     if (!user) throw new Error('User must be authenticated');

@@ -47,6 +47,10 @@ export class PrayerFeedPage {
     this.router.navigate(['/prayer-request', id]);
   }
 
+  onEdit(id: string): void {
+    this.router.navigate(['/prayer-request', id, 'edit']);
+  }
+
   async onPray(id: string): Promise<void> {
     this.actionError.set(null);
     try {
