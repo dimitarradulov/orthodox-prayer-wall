@@ -14,6 +14,7 @@ import { PrayerRequestsStore } from '../store/prayer-requests.store';
 import { AuthService } from '../../../core/auth/auth.service';
 import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-prayer-feed',
@@ -30,6 +31,7 @@ export class PrayerFeedPage {
   private readonly prayerRequestService = inject(PrayerRequestService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly snackbarService = inject(SnackbarService);
   readonly store = inject(PrayerRequestsStore);
 
   readonly currentUserId = computed(() => this.auth.user()?.id ?? null);
@@ -77,6 +79,7 @@ export class PrayerFeedPage {
       try {
         await this.prayerRequestService.delete(id);
         this.store.removeRequest(id);
+        this.snackbarService.showSuccess('Prayer request deleted successfully.');
       } catch (err) {
         this.actionError.set(
           err instanceof Error ? err.message : 'Failed to delete. Please try again.',

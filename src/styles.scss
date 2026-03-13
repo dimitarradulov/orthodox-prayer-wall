@@ -1,5 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
-
+@use '@angular/material' as mat;
 @import 'tailwindcss';
 
 @theme {
@@ -15,4 +14,15 @@
   body {
     font-family: var(--font-ui);
   }
+}
+
+:root {
+  @include mat.snack-bar-overrides(
+    (
+      button-color: white,
+      supporting-text-color: white,
+      container-color: #15803d,
+      container-shape: 0.75rem,
+    )
+  );
 }

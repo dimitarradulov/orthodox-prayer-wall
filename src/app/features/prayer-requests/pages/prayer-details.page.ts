@@ -15,6 +15,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
 import { PrayerRequest } from '../models/prayer.model';
 import { RelativeDatePipe } from '../pipes/relative-date.pipe';
 import { PrayerRequestService } from '../services/prayer-request.service';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-prayer-details',
@@ -28,6 +29,7 @@ export class PrayerDetailsPage {
   private readonly prayerRequestService = inject(PrayerRequestService);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly snackbarService = inject(SnackbarService);
 
   readonly prayer = signal<PrayerRequest | null>(null);
   readonly loading = signal(true);
@@ -90,6 +92,7 @@ export class PrayerDetailsPage {
     if (p) {
       try {
         await this.prayerRequestService.delete(p.id);
+        this.snackbarService.showSuccess('Prayer request deleted successfully.');
         this.router.navigate(['/']);
       } catch (err) {
         this.error.set(err instanceof Error ? err.message : 'Failed to delete. Please try again.');
