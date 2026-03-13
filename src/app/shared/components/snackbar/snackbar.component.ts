@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import {
   MAT_SNACK_BAR_DATA,
-  MatSnackBarAction,
   MatSnackBarActions,
   MatSnackBarLabel,
   MatSnackBarRef,
@@ -11,7 +10,7 @@ import {
 @Component({
   selector: 'app-snackbar',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatSnackBarLabel, MatSnackBarActions, MatSnackBarAction, MatButton],
+  imports: [MatSnackBarLabel, MatSnackBarActions, MatButton],
   template: `
     <article class="flex">
       <span matSnackBarLabel>{{ data.message }}</span>
