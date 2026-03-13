@@ -1,65 +1,93 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject } from '@angular/core';
+import { patchState, signalStore, type, withComputed, withMethods, withState } from '@ngrx/signals';
+import {
+  addEntities,
+  entityConfig,
+  removeEntity,
+  setAllEntities,
+  updateEntity,
+  withEntities,
+} from '@ngrx/signals/entities';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { tapResponse } from '@ngrx/operators';
+import { filter, from, pipe, switchMap, tap } from 'rxjs';
 import { PrayerRequestService } from '../services/prayer-request.service';
 import { PrayerRequest } from '../models/prayer.model';
 import { PAGE_SIZE } from '../prayer-requests.constants';
 
-@Injectable({ providedIn: 'root' })
-export class PrayerRequestsStore {
-  private readonly service = inject(PrayerRequestService);
+const requestConfig = entityConfig({
+  entity: type<PrayerRequest>(),
+  collection: '_request',
+});
 
-  private readonly _requests = signal<PrayerRequest[]>([]);
-  private readonly _loading = signal(false);
-  private readonly _cursor = signal<string | null>(null);
-  private readonly _hasMore = signal(true);
-  private readonly _error = signal<unknown>(null);
+export const PrayerRequestsStore = signalStore(
+  { providedIn: 'root' },
+  withEntities(requestConfig),
+  withState({
+    loading: false,
+    _cursor: null as string | null,
+    hasMore: true,
+    error: null as unknown,
+  }),
+  withMethods((store, service = inject(PrayerRequestService)) => {
+    const getCursor = (data: PrayerRequest[]) =>
+      data.length > 0 ? data[data.length - 1].created_at : null;
 
-  readonly requests = this._requests.asReadonly();
-  readonly loading = this._loading.asReadonly();
-  readonly hasMore = this._hasMore.asReadonly();
-  readonly error = this._error.asReadonly();
+    return {
+      loadInitial: rxMethod<void>(
+        pipe(
+          tap(() =>
+            patchState(store, setAllEntities([] as PrayerRequest[], requestConfig), {
+              loading: true,
+              _cursor: null,
+              hasMore: true,
+              error: null,
+            }),
+          ),
+          switchMap(() =>
+            from(service.getPage()).pipe(
+              tapResponse({
+                next: (data) =>
+                  patchState(store, addEntities(data, requestConfig), {
+                    _cursor: getCursor(data),
+                    hasMore: data.length === PAGE_SIZE,
+                    loading: false,
+                  }),
+                error: (err) => patchState(store, { error: err, loading: false }),
+              }),
+            ),
+          ),
+        ),
+      ),
 
-  async loadInitial(): Promise<void> {
-    this._requests.set([]);
-    this._cursor.set(null);
-    this._hasMore.set(true);
-    this._error.set(null);
-    this._loading.set(true);
-    try {
-      const data = await this.service.getPage();
-      this._requests.set(data);
-      this.setCursor(data);
-      this._hasMore.set(data.length === PAGE_SIZE);
-    } catch (err) {
-      this._error.set(err);
-    } finally {
-      this._loading.set(false);
-    }
-  }
+      loadMore: rxMethod<void>(
+        pipe(
+          filter(() => !store.loading() && store.hasMore()),
+          tap(() => patchState(store, { loading: true })),
+          switchMap(() =>
+            from(service.getPage(store._cursor() ?? undefined)).pipe(
+              tapResponse({
+                next: (data) =>
+                  patchState(store, addEntities(data, requestConfig), {
+                    _cursor: getCursor(data),
+                    hasMore: data.length === PAGE_SIZE,
+                    loading: false,
+                  }),
+                error: (err) => patchState(store, { error: err, loading: false }),
+              }),
+            ),
+          ),
+        ),
+      ),
 
-  async loadMore(): Promise<void> {
-    if (this._loading() || !this._hasMore()) return;
-    this._loading.set(true);
-    try {
-      const data = await this.service.getPage(this._cursor() ?? undefined);
-      this._requests.update((prev) => [...prev, ...data]);
-      this.setCursor(data);
-      this._hasMore.set(data.length === PAGE_SIZE);
-    } catch (err) {
-      this._error.set(err);
-    } finally {
-      this._loading.set(false);
-    }
-  }
+      removeRequest: (id: string) => patchState(store, removeEntity(id, requestConfig)),
 
-  removeRequest(id: string): void {
-    this._requests.update((list) => list.filter((r) => r.id !== id));
-  }
-
-  updateRequest(id: string, patch: Partial<PrayerRequest>): void {
-    this._requests.update((list) => list.map((r) => (r.id === id ? { ...r, ...patch } : r)));
-  }
-
-  private setCursor(data: PrayerRequest[]): void {
-    this._cursor.set(data.length > 0 ? data[data.length - 1].created_at : null);
-  }
-}
+      updateRequest: (id: string, patch: Partial<PrayerRequest>) =>
+        patchState(store, updateEntity({ id, changes: patch }, requestConfig)),
+    };
+  }),
+  withComputed(({ _requestEntities }) => ({
+    prayerRequests: _requestEntities,
+    hasPrayerRequests: computed(() => _requestEntities().length > 0),
+  })),
+);

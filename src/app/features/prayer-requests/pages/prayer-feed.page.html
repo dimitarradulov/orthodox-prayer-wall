@@ -13,9 +13,9 @@
     </div>
   }
 
-  @if (store.loading() && store.requests().length === 0) {
+  @if (store.loading() && store.hasPrayerRequests()) {
     <app-loading-spinner />
-  } @else if (store.error() && store.requests().length === 0) {
+  } @else if (store.error() && store.hasPrayerRequests()) {
     <div class="flex flex-col items-center justify-center py-20 text-gray-500" role="alert">
       <p class="text-lg mb-4">Something went wrong loading prayers.</p>
       <button
@@ -34,7 +34,7 @@
       (scrolled)="store.loadMore()"
     >
       <app-prayer-list
-        [prayers]="store.requests()"
+        [prayers]="store.prayerRequests()"
         [currentUserId]="currentUserId()"
         (prayerClicked)="onPray($event)"
         (deleteClicked)="onDelete($event)"

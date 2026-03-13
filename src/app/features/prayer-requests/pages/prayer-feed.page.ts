@@ -52,7 +52,7 @@ export class PrayerFeedPage {
     try {
       const wasNew = await this.prayerRequestService.pray(id);
       if (wasNew) {
-        const prayer = this.store.requests().find((r) => r.id === id);
+        const prayer = this.store.prayerRequests().find((r) => r.id === id);
         if (prayer) {
           this.store.updateRequest(id, {
             prayer_count: prayer.prayer_count + 1,
