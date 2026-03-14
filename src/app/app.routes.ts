@@ -7,12 +7,14 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./features/prayer-requests/pages/prayer-feed.page').then((m) => m.PrayerFeedPage),
+      import('./features/prayer-requests/pages/prayer-feed/prayer-feed.page').then(
+        (m) => m.PrayerFeedPage,
+      ),
   },
   {
     path: 'prayer-request/:id',
     loadComponent: () =>
-      import('./features/prayer-requests/pages/prayer-details.page').then(
+      import('./features/prayer-requests/pages/prayer-details/prayer-details.page').then(
         (m) => m.PrayerDetailsPage,
       ),
   },
