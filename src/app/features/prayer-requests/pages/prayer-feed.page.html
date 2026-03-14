@@ -13,20 +13,7 @@
     </div>
   }
 
-  @if (store.loading() && store.hasPrayerRequests()) {
-    <app-loading-spinner />
-  } @else if (store.error() && store.hasPrayerRequests()) {
-    <div class="flex flex-col items-center justify-center py-20 text-gray-500" role="alert">
-      <p class="text-lg mb-4">Something went wrong loading prayers.</p>
-      <button
-        type="button"
-        class="cursor-pointer bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-        (click)="store.loadInitial()"
-      >
-        Try again
-      </button>
-    </div>
-  } @else {
+  @if (store.hasPrayerRequests()) {
     <div
       infiniteScroll
       [infiniteScrollDistance]="2"
@@ -45,6 +32,21 @@
 
     @if (store.loading()) {
       <app-loading-spinner />
+    }
+  } @else {
+    @if (store.loading()) {
+      <app-loading-spinner />
+    } @else if (store.error()) {
+      <div class="flex flex-col items-center justify-center py-20 text-gray-500" role="alert">
+        <p class="text-lg mb-4">Something went wrong loading prayers.</p>
+        <button
+          type="button"
+          class="cursor-pointer bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          (click)="store.loadInitial()"
+        >
+          Try again
+        </button>
+      </div>
     }
   }
 </main>
