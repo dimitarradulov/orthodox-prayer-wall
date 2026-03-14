@@ -13,7 +13,7 @@ import { tapResponse } from '@ngrx/operators';
 import { filter, from, pipe, switchMap, tap } from 'rxjs';
 import { PrayerRequestService } from '../services/prayer-request.service';
 import { PrayerRequest } from '../models/prayer.model';
-import { PAGE_SIZE } from '../prayer-requests.constants';
+import { PAGE_SIZE } from '../constants/prayer-requests.constants';
 
 const requestConfig = entityConfig({
   entity: type<PrayerRequest>(),

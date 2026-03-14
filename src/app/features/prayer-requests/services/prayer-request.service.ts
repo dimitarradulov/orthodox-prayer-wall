@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { AuthService } from '../../../core/auth/auth.service';
 import { PrayerRequest } from '../models/prayer.model';
-import { PAGE_SIZE } from '../prayer-requests.constants';
+import { PAGE_SIZE } from '../constants/prayer-requests.constants';
 
 @Injectable({ providedIn: 'root' })
 export class PrayerRequestService {
