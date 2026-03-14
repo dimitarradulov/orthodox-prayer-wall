@@ -39,6 +39,23 @@ export class PrayerRequestService {
     return { ...row, has_prayed: (prayers?.length ?? 0) > 0 };
   }
 
+  async getByAuthor(userId: string): Promise<PrayerRequest[]> {
+    const { data, error } = await this.supabase
+      .from('prayer_requests')
+      .select('*, prayers(id)')
+      .eq('author_id', userId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    return (data as (PrayerRequest & { prayers: { id: string }[] })[]).map(
+      ({ prayers, ...row }) => ({ ...row, has_prayed: (prayers?.length ?? 0) > 0 }),
+    );
+  }
+
+  async updateStatus(id: string, status: PrayerRequest['status']): Promise<void> {
+    const { error } = await this.supabase.from('prayer_requests').update({ status }).eq('id', id);
+    if (error) throw error;
+  }
+
   async pray(id: string): Promise<boolean> {
     const { data } = await this.supabase.rpc('pray_for_request', { p_request_id: id });
     return !!data;

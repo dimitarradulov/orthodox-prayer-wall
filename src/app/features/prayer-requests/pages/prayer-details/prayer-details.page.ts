@@ -9,13 +9,13 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/auth/auth.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { PrayerRequest } from '../models/prayer.model';
-import { RelativeDatePipe } from '../pipes/relative-date.pipe';
-import { PrayerRequestService } from '../services/prayer-request.service';
-import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PrayerRequest } from '../../models/prayer.model';
+import { RelativeDatePipe } from '../../pipes/relative-date.pipe';
+import { PrayerRequestService } from '../../services/prayer-request.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-prayer-details',

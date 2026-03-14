@@ -8,13 +8,13 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
-import { PrayerListComponent } from '../components/prayer-list/prayer-list.component';
-import { PrayerRequestService } from '../services/prayer-request.service';
-import { PrayerRequestsStore } from '../store/prayer-requests.store';
-import { AuthService } from '../../../core/auth/auth.service';
-import { LoadingSpinnerComponent } from '../../../shared/components/loading-spinner/loading-spinner.component';
-import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { PrayerListComponent } from '../../components/prayer-list/prayer-list.component';
+import { PrayerRequestService } from '../../services/prayer-request.service';
+import { PrayerRequestsStore } from '../../store/prayer-requests.store';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { LoadingSpinnerComponent } from '../../../../shared/components/loading-spinner/loading-spinner.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-prayer-feed',
